@@ -49,11 +49,6 @@ final class ClothScreens {
                     Component.translatable("gui." + schema.namespace() + ".scope." + schema.scope().suffix()));
             Map<String, Object> edited = new LinkedHashMap<>();
             pending.put(config, edited);
-            if (pending.size() == 1) {
-                // 显眼位置说明本机与服端配置的区别，不另开界面
-                category.addEntry(entries.startTextDescription(
-                        Component.translatable("gui." + schema.namespace() + ".hint.local_only")).build());
-            }
             for (ConfigOption option : schema.guiOptions()) {
                 category.addEntry(build(entries, config, option, edited));
             }
