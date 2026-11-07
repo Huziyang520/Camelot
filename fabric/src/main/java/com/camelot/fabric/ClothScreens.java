@@ -9,10 +9,8 @@ import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.permissions.Permissions;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -38,9 +36,6 @@ final class ClothScreens {
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
                 .setTitle(Component.translatable(configs.get(0).schema().titleKey()));
-        if (!canEdit()) {
-            builder.setEditable(false);
-        }
         ConfigEntryBuilder entries = builder.entryBuilder();
         Map<CamelotConfig, Map<String, Object>> pending = new LinkedHashMap<>();
         for (CamelotConfig config : configs) {
@@ -61,11 +56,6 @@ final class ClothScreens {
             }
         }));
         return builder.build();
-    }
-
-    private static boolean canEdit() {
-        Minecraft mc = Minecraft.getInstance();
-        return mc.player == null || mc.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
