@@ -69,7 +69,7 @@ public final class NeoConfigs {
     private static ModConfig.Type type(ConfigScope scope) {
         // The common config belongs to the server: NeoForge greys out SERVER/SYNCED sections
         // for players who may not change them, which is the requested operator-only rule.
-        return scope == ConfigScope.CLIENT ? constant("CLIENT") : constant("SYNCED", "SERVER");
+        return scope == ConfigScope.CLIENT ? constant("CLIENT") : constant("SYNCED", "SERVER", "COMMON", "LOCAL");
     }
 
     private static ModConfig.Type constant(String... names) {
