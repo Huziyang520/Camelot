@@ -3,7 +3,7 @@
     "id": "${mod_id}",
     "version": "${version}",
     "name": "${mod_name}",
-    "description": "Shared library for Only TP and AuthCmd. Never published on its own; business mods bundle it.",
+    "description": "Shared library: configuration screens, join notices, networking and GUI helpers.",
     "authors": [
         "${mod_author}"
     ],
