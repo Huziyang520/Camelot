@@ -1,9 +1,10 @@
-package com.camelot.ui;
+package com.camelot.fabric;
 
 import com.camelot.config.CamelotConfig;
 import com.camelot.config.ConfigOption;
 import com.camelot.config.ConfigSchema;
 import com.camelot.net.CamelotNet;
+import com.camelot.platform.ModPresence;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
@@ -19,80 +20,85 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Builds the config screen from a schema with Cloth Config API.
+ * Builds the Fabric config screen from the schemas with Cloth Config API.
  *
- * <p>This is the only class in the library that references Cloth types; it is reached
- * exclusively through {@link ConfigScreens#cloth}, which checks that the mod is loaded.
- *
- * <p>Edited values are held locally until Save, so closing the screen without saving
- * leaves the config untouched.
+ * <p>This is the only class of the library that references Cloth types; it is reached
+ * through {@link FabricConfigs#register}, which checks the mod is present first.
+ * Edited values are held locally until Save, so closing the screen changes nothing.
  */
-public final class ClothScreen {
+final class ClothScreens {
 
-    private ClothScreen() {
+    private static final String CLOTH = "cloth-config";
+
+    private ClothScreens() {
     }
 
-    public static Screen create(Screen parent, CamelotConfig config) {
-        ConfigSchema schema = config.schema();
+    static Screen create(Screen parent, List<CamelotConfig> configs) {
+        if (!ModPresence.isLoaded(CLOTH)) {
+            return null;
+        }
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
-                .setTitle(Component.translatable(schema.titleKey()));
-        // 世界内非 OP 只能查看：服务端会拒绝其更新，界面也不应允许改动
+                .setTitle(Component.translatable(configs.get(0).schema().titleKey()));
+        // 世界内非 OP 只能查看：服务端会拒绝其更新
         if (!canEdit()) {
             builder.setEditable(false);
         }
         ConfigEntryBuilder entries = builder.entryBuilder();
-        ConfigCategory category = builder.getOrCreateCategory(Component.translatable(schema.titleKey()));
-
-        Map<String, Object> pending = new LinkedHashMap<>();
-        for (ConfigOption option : schema.guiOptions()) {
-            category.addEntry(build(entries, config, option, pending));
+        Map<CamelotConfig, Map<String, Object>> pending = new LinkedHashMap<>();
+        for (CamelotConfig config : configs) {
+            ConfigSchema schema = config.schema();
+            ConfigCategory category = builder.getOrCreateCategory(
+                    Component.translatable("gui." + schema.namespace() + ".scope." + schema.scope().suffix()));
+            Map<String, Object> edited = new LinkedHashMap<>();
+            pending.put(config, edited);
+            for (ConfigOption option : schema.guiOptions()) {
+                category.addEntry(build(entries, config, option, edited));
+            }
         }
-
-        builder.setSavingRunnable(() -> {
-            pending.forEach(config::set);
+        builder.setSavingRunnable(() -> pending.forEach((config, edited) -> {
+            edited.forEach(config::set);
             config.save();
-            CamelotNet.sendUpdate(config);
-        });
+            if (config.scope() == com.camelot.config.ConfigScope.COMMON) {
+                CamelotNet.sendUpdate(config);
+            }
+        }));
         return builder.build();
     }
 
-    /** 主菜单（没有本地玩家）或拥有管理权限时才可编辑。 */
     private static boolean canEdit() {
         Minecraft mc = Minecraft.getInstance();
-        return mc.player == null
-                || mc.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
+        return mc.player == null || mc.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     private static AbstractConfigListEntry build(ConfigEntryBuilder entries, CamelotConfig config,
-                                                 ConfigOption option, Map<String, Object> pending) {
+                                                 ConfigOption option, Map<String, Object> edited) {
         Component label = Component.translatable(config.schema().labelKey(option));
         Object defaultValue = option.defaultValue();
         switch (option.type()) {
             case BOOLEAN:
                 return entries.startBooleanToggle(label, config.getBool(option.key()))
                         .setDefaultValue((Boolean) defaultValue)
-                        .setSaveConsumer(value -> pending.put(option.key(), value))
+                        .setSaveConsumer(value -> edited.put(option.key(), value))
                         .build();
             case SWITCH:
                 return entries.startBooleanToggle(label, config.getInt(option.key()) != 0)
                         .setDefaultValue((Integer) defaultValue != 0)
-                        .setSaveConsumer(value -> pending.put(option.key(), value ? 1 : 0))
+                        .setSaveConsumer(value -> edited.put(option.key(), value ? 1 : 0))
                         .build();
             case SELECT:
                 return entries.startStringDropdownMenu(label, config.getString(option.key()),
                                 choice -> Component.translatable(config.schema().valueLabelKey(option, choice)))
                         .setSelections(option.choices())
                         .setDefaultValue((String) defaultValue)
-                        .setSaveConsumer(value -> pending.put(option.key(), value))
+                        .setSaveConsumer(value -> edited.put(option.key(), value))
                         .build();
             case STRING_LIST:
-                List<String> current = new ArrayList<>(config.getList(option.key()));
-                return entries.startStrList(label, current)
+                return entries.startStrList(label, new ArrayList<>(config.getList(option.key())))
                         .setDefaultValue(() -> new ArrayList<>((List<String>) defaultValue))
                         .setExpanded(true)
-                        .setSaveConsumer(value -> pending.put(option.key(), new ArrayList<>(value)))
+                        .setSaveConsumer(value -> edited.put(option.key(), new ArrayList<>(value)))
                         .build();
             default:
                 throw new IllegalArgumentException("Unsupported option type: " + option.type());

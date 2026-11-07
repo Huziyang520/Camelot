@@ -1,36 +1,43 @@
 package com.camelot.ui;
 
-import com.camelot.config.CamelotConfig;
-import com.camelot.platform.ModPresence;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
- * Config screen dispatch.
+ * Screen dispatch, one provider per mod namespace.
  *
- * <p>The screen is generated from the config schema with Cloth Config API. Cloth is a
- * soft dependency: when it is missing, {@link #cloth} returns {@code null} and the
- * caller decides what to show instead.
+ * <p>The platform decides what a mod's config screen is: NeoForge registers its own
+ * {@code ConfigurationScreen}, Fabric a screen generated with Cloth Config API. A
+ * missing provider, or a provider returning {@code null}, only means this mod has no
+ * screen — it never falls back to another mod's UI.
  */
 public final class ConfigScreens {
 
-    private static final String CLOTH = "cloth-config";
+    /** Builds the config screen of one mod; may return {@code null}. */
+    @FunctionalInterface
+    public interface Factory {
+        Screen create(Screen parent);
+    }
+
+    private static final Map<String, Factory> FACTORIES = new ConcurrentHashMap<>();
 
     private ConfigScreens() {
     }
 
-    public static boolean clothAvailable() {
-        return ModPresence.isLoaded(CLOTH);
+    public static void register(String namespace, Factory factory) {
+        FACTORIES.put(namespace, factory);
     }
 
-    /**
-     * Builds the config screen, or returns {@code null} when Cloth Config is absent.
-     *
-     * <p>The Cloth-referencing class is only loaded inside the guarded branch, so a
-     * player without Cloth never touches those types.
-     */
-    public static Screen cloth(Screen parent, CamelotConfig config) {
-        return clothAvailable() ? ClothScreen.create(parent, config) : null;
+    public static boolean available(String namespace) {
+        return FACTORIES.containsKey(namespace);
+    }
+
+    public static Screen create(String namespace, Screen parent) {
+        Factory factory = FACTORIES.get(namespace);
+        return factory == null ? null : factory.create(parent);
     }
 
     /** Second-level screen shown when the server has closed the config entry. */

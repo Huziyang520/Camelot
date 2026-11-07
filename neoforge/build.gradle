@@ -28,7 +28,4 @@ dependencies {
     compileOnly(group: 'me.shedaniel.cloth', name: 'cloth-config-neoforge', version: cloth_config_version) {
         transitive = false
     }
-    // nightconfig（TOML）：NeoForge 运行时自带，编译期显式声明
-    compileOnly group: 'com.electronwill.night-config', name: 'core', version: '3.6.4'
-    compileOnly group: 'com.electronwill.night-config', name: 'toml', version: '3.6.4'
 }

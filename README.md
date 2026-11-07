@@ -8,7 +8,7 @@ Shared library: platform abstraction, config engine and config screens, join-wor
 |---|---|
 | Platform | Loader detection, optional dependency probing, config directory |
 | Config | Field schemas, file read/write, server-to-client sync, hot reload, one-shot versioned migration |
-| UI | Config screen generated from the schema (Cloth Config API, soft dependency) |
+| Config UI | NeoForge: its own generated screen; Fabric: screen generated from the schema (Cloth Config API, soft dependency) |
 | Messages | Translatable components with fallback text |
 | Prompts | Join-world prompts, dismissible per player |
 | Network | Payload registration and dispatch on one shared channel |
@@ -46,7 +46,7 @@ MIT.
 |---|---|
 | 平台 | 加载器判定、可选前置探测、配置目录 |
 | 配置 | 字段 schema、文件读写、服务端到客户端同步、热加载、带版本的一次性迁移 |
-| 界面 | 按 schema 生成配置界面（Cloth Config API，软依赖） |
+| 配置界面 | NeoForge：用其自带的生成界面；Fabric：按 schema 生成界面（Cloth Config API，软依赖） |
 | 消息 | 带兜底文案的可翻译组件 |
 | 提示 | 进世界提示，可按玩家关闭 |
 | 网络 | payload 注册与分发（全库共用一个通道） |

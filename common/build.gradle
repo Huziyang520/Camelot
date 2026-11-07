@@ -14,9 +14,6 @@ dependencies {
     compileOnly(group: 'me.shedaniel.cloth', name: 'cloth-config-neoforge', version: cloth_config_version) {
         transitive = false
     }
-    // nightconfig（TOML）：运行时由加载器提供（Fabric 端显式打包，见 fabric/build.gradle）
-    compileOnly group: 'com.electronwill.night-config', name: 'core', version: '3.6.4'
-    compileOnly group: 'com.electronwill.night-config', name: 'toml', version: '3.6.4'
 }
 
 configurations {

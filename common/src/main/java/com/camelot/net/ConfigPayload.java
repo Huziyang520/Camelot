@@ -3,6 +3,7 @@ package com.camelot.net;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -15,7 +16,9 @@ import java.util.Map;
  */
 public record ConfigPayload(String namespace, Map<String, String> values) implements CustomPacketPayload {
 
-    public static final Type<ConfigPayload> TYPE = CustomPacketPayload.createType("camelot:config");
+    /** {@code createType(String)} treats its argument as a path, hence the explicit id. */
+    public static final Type<ConfigPayload> TYPE =
+            new Type<>(Identifier.fromNamespaceAndPath("camelot", "config"));
 
     public static final StreamCodec<FriendlyByteBuf, ConfigPayload> CODEC =
             StreamCodec.of((buf, payload) -> payload.write(buf), ConfigPayload::read);

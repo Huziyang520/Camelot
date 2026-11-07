@@ -3,10 +3,9 @@ package com.camelot.config;
 import java.util.List;
 
 /**
- * One configurable value: key, kind, default and how it is presented.
+ * One schema entry: key, type, default value and how it is presented.
  *
- * <p>Instances are immutable after the schema is built; the fluent setters are meant
- * to be used inside a {@code List.of(...)} literal.
+ * <p>Instances are immutable; the builder methods return a copy.
  */
 public final class ConfigOption {
 
@@ -14,57 +13,50 @@ public final class ConfigOption {
     private final ConfigType type;
     private final Object defaultValue;
     private final List<String> choices;
+    private final String comment;
+    private final String legacyKey;
+    private final boolean inGui;
 
-    private boolean synced = true;
-    private boolean inGui = true;
-    private String comment;
-    private String legacyKey;
-
-    private ConfigOption(String key, ConfigType type, Object defaultValue, List<String> choices) {
+    private ConfigOption(String key, ConfigType type, Object defaultValue, List<String> choices,
+                         String comment, String legacyKey, boolean inGui) {
         this.key = key;
         this.type = type;
         this.defaultValue = defaultValue;
         this.choices = List.copyOf(choices);
+        this.comment = comment;
+        this.legacyKey = legacyKey;
+        this.inGui = inGui;
     }
 
     public static ConfigOption bool(String key, boolean defaultValue) {
-        return new ConfigOption(key, ConfigType.BOOLEAN, defaultValue, List.of());
+        return new ConfigOption(key, ConfigType.BOOLEAN, defaultValue, List.of(), null, null, true);
     }
 
     public static ConfigOption switchInt(String key, int defaultValue) {
-        return new ConfigOption(key, ConfigType.SWITCH, defaultValue == 0 ? 0 : 1, List.of());
+        return new ConfigOption(key, ConfigType.SWITCH, defaultValue == 0 ? 0 : 1, List.of(), null, null, true);
     }
 
     public static ConfigOption select(String key, String defaultValue, String... choices) {
-        return new ConfigOption(key, ConfigType.SELECT, defaultValue, List.of(choices));
+        return new ConfigOption(key, ConfigType.SELECT, defaultValue, List.of(choices), null, null, true);
     }
 
     public static ConfigOption list(String key, List<String> defaultValue) {
-        return new ConfigOption(key, ConfigType.STRING_LIST, List.copyOf(defaultValue), List.of());
+        return new ConfigOption(key, ConfigType.STRING_LIST, List.copyOf(defaultValue), List.of(), null, null, true);
     }
 
-    /** Value belongs to this side only and is never sent over the network. */
-    public ConfigOption clientOnly() {
-        this.synced = false;
-        return this;
-    }
-
-    /** Kept in the file but not shown in the config screen. */
-    public ConfigOption hidden() {
-        this.inGui = false;
-        return this;
-    }
-
-    /** Text written as a comment above the option's table (list options only). */
+    /** Tooltip shown by the screen, written above the key in the file. */
     public ConfigOption comment(String text) {
-        this.comment = text;
-        return this;
+        return new ConfigOption(key, type, defaultValue, choices, text, legacyKey, inGui);
     }
 
-    /** Key read when {@link #key()} is missing; used once for renames. */
+    /** Key used by an older file version; read once when the new key is absent. */
     public ConfigOption legacy(String oldKey) {
-        this.legacyKey = oldKey;
-        return this;
+        return new ConfigOption(key, type, defaultValue, choices, comment, oldKey, inGui);
+    }
+
+    /** Kept out of the generated screen, file-only. */
+    public ConfigOption fileOnly() {
+        return new ConfigOption(key, type, defaultValue, choices, comment, legacyKey, false);
     }
 
     public String key() {
@@ -83,19 +75,15 @@ public final class ConfigOption {
         return choices;
     }
 
-    public boolean synced() {
-        return synced;
-    }
-
-    public boolean inGui() {
-        return inGui;
-    }
-
     public String comment() {
         return comment;
     }
 
     public String legacyKey() {
         return legacyKey;
+    }
+
+    public boolean inGui() {
+        return inGui;
     }
 }

@@ -2,6 +2,7 @@ package com.camelot.net;
 
 import com.camelot.config.CamelotConfig;
 import com.camelot.config.CamelotConfigs;
+import com.camelot.config.ConfigScope;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
@@ -46,25 +47,30 @@ public final class CamelotNet {
         sender = netSender;
     }
 
-    /** Sends every registered config to one player. */
+    /** Sends every syncable config to one player. */
     public static void syncTo(ServerPlayer player) {
         NetSender net = sender;
         if (net == null || player == null || !net.canReceive(player)) {
             return;
         }
         for (CamelotConfig config : CamelotConfigs.all()) {
-            net.toPlayer(player, new ConfigPayload(config.namespace(), config.snapshotSynced()));
+            if (config.synced()) {
+                net.toPlayer(player, new ConfigPayload(config.namespace(), config.snapshot()));
+            }
         }
     }
 
-    /** Re-sends every registered config to all online players. */
+    /** Re-sends every syncable config to all online players. */
     public static void syncToAll(MinecraftServer server) {
         NetSender net = sender;
         if (net == null || server == null) {
             return;
         }
         for (CamelotConfig config : CamelotConfigs.all()) {
-            ConfigPayload payload = new ConfigPayload(config.namespace(), config.snapshotSynced());
+            if (!config.synced()) {
+                continue;
+            }
+            ConfigPayload payload = new ConfigPayload(config.namespace(), config.snapshot());
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 if (net.canReceive(player)) {
                     net.toPlayer(player, payload);
@@ -76,14 +82,14 @@ public final class CamelotNet {
     /** Pushes local edits to the server (client side only); no-op when not in a world. */
     public static void sendUpdate(CamelotConfig config) {
         NetSender net = sender;
-        if (net != null) {
-            net.toServer(new ConfigPayload(config.namespace(), config.snapshotSynced()));
+        if (net != null && config.synced()) {
+            net.toServer(new ConfigPayload(config.namespace(), config.snapshot()));
         }
     }
 
     /** Values arrived from the server. */
     public static void onClientPayload(ConfigPayload payload) {
-        CamelotConfig config = CamelotConfigs.get(payload.namespace());
+        CamelotConfig config = CamelotConfigs.get(payload.namespace(), ConfigScope.COMMON);
         if (config != null) {
             config.applyRemote(payload.values());
             SYNCED.add(payload.namespace());
@@ -100,7 +106,7 @@ public final class CamelotNet {
         if (player == null || !player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
             return;
         }
-        CamelotConfig config = CamelotConfigs.get(payload.namespace());
+        CamelotConfig config = CamelotConfigs.get(payload.namespace(), ConfigScope.COMMON);
         if (config == null) {
             return;
         }

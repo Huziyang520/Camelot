@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * File name, translation keys and the ordered option list of one mod's config.
+ * File identity, translation keys and the ordered option list of one config.
  *
  * <p>Order is significant: it is both the on-disk order and the screen order, so
  * functional options come first and presentation options come last.
@@ -14,13 +14,13 @@ import java.util.Set;
 public final class ConfigSchema {
 
     private final String namespace;
-    private final String fileName;
+    private final ConfigScope scope;
     private final String titleKey;
     private final List<ConfigOption> options;
 
-    public ConfigSchema(String namespace, String fileName, String titleKey, List<ConfigOption> options) {
+    public ConfigSchema(String namespace, ConfigScope scope, String titleKey, List<ConfigOption> options) {
         this.namespace = namespace;
-        this.fileName = fileName;
+        this.scope = scope;
         this.titleKey = titleKey;
         this.options = List.copyOf(options);
 
@@ -36,8 +36,13 @@ public final class ConfigSchema {
         return namespace;
     }
 
+    public ConfigScope scope() {
+        return scope;
+    }
+
+    /** File name, {@code <modid>-<scope>.toml}. */
     public String fileName() {
-        return fileName;
+        return namespace + "-" + scope.suffix() + ".toml";
     }
 
     public String titleKey() {

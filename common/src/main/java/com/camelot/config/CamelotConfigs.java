@@ -3,36 +3,61 @@ package com.camelot.config;
 import com.camelot.net.CamelotNet;
 import net.minecraft.server.MinecraftServer;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-/** Registry of the configs owned by the mods that bundle this library. */
+/** Registry of every config owned by the mods that bundle this library. */
 public final class CamelotConfigs {
 
-    private static final Map<String, CamelotConfig> REGISTRY = new ConcurrentHashMap<>();
+    private static final Map<String, List<CamelotConfig>> REGISTRY = new LinkedHashMap<>();
 
     private CamelotConfigs() {
     }
 
     public static void register(CamelotConfig config) {
-        REGISTRY.put(config.namespace(), config);
+        List<CamelotConfig> configs = REGISTRY.computeIfAbsent(config.namespace(), key -> new ArrayList<>());
+        if (!configs.contains(config)) {
+            configs.add(config);
+        }
     }
 
-    public static CamelotConfig get(String namespace) {
-        return REGISTRY.get(namespace);
+    /** The config of {@code namespace} that {@code scope} selects. */
+    public static CamelotConfig get(String namespace, ConfigScope scope) {
+        for (CamelotConfig config : REGISTRY.getOrDefault(namespace, List.of())) {
+            if (config.scope() == scope) {
+                return config;
+            }
+        }
+        return null;
     }
 
     public static Iterable<CamelotConfig> all() {
-        return REGISTRY.values();
+        List<CamelotConfig> flat = new ArrayList<>();
+        REGISTRY.values().forEach(flat::addAll);
+        return flat;
     }
 
-    /** Hot-reload pass driven by the server tick; changed configs are re-broadcast. */
-    public static void tick(MinecraftServer server) {
-        boolean changed = false;
-        for (CamelotConfig config : REGISTRY.values()) {
-            changed |= config.reloadIfChanged();
+    /** Client-side pass: only local configs, so server values are never overwritten. */
+    public static void tickClient() {
+        for (CamelotConfig config : all()) {
+            if (config.scope() == ConfigScope.CLIENT) {
+                config.reload();
+            }
         }
-        if (changed) {
+    }
+
+    /** Reload pass; changed server-side configs are re-broadcast. */
+    public static void tick(MinecraftServer server) {
+        boolean resend = false;
+        for (CamelotConfig config : all()) {
+            boolean changed = config.reload();
+            if (changed && config.synced()) {
+                resend = true;
+            }
+        }
+        if (resend) {
             CamelotNet.onServerReload(server);
         }
     }
