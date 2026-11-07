@@ -1,0 +1,27 @@
+{
+    "schemaVersion": 1,
+    "id": "${mod_id}",
+    "version": "${version}",
+    "name": "${mod_name}",
+    "description": "Shared library for Only TP and AuthCmd. Never published on its own; business mods bundle it.",
+    "authors": [
+        "${mod_author}"
+    ],
+    "contact": {
+        "homepage": "https://github.com/Huziyang520/Camelot",
+        "issues": "https://github.com/Huziyang520/Camelot/issues"
+    },
+    "license": "${license}",
+    "icon": "assets/camelot/textures/icon.png",
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            "com.camelot.fabric.CamelotFabric"
+        ]
+    },
+    "depends": {
+        "fabricloader": ">=0.14",
+        "minecraft": "${minecraft_version_range_fabric}",
+        "java": ">=${java_version}"
+    }
+}
