@@ -22,3 +22,20 @@ neoForge {
         }
     }
 }
+
+dependencies {
+
+    compileOnly(group: 'me.shedaniel.cloth', name: 'cloth-config-neoforge', version: cloth_config_neoforge_version) {
+        transitive = false
+    }
+}
+
+configurations.configureEach {
+    if (name.startsWith('neoFormRuntime')) {
+        resolutionStrategy.eachDependency { details ->
+            if (details.requested.group == 'org.apache.logging.log4j') {
+                details.useVersion('2.19.0')
+            }
+        }
+    }
+}

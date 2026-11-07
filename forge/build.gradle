@@ -30,6 +30,9 @@ minecraft {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     compileOnly project(':common')
+    compileOnly(group: 'me.shedaniel.cloth', name: 'cloth-config-forge', version: cloth_config_version) {
+        transitive = false
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {

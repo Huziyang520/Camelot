@@ -17,6 +17,9 @@
     "entrypoints": {
         "main": [
             "com.camelot.fabric.CamelotFabric"
+        ],
+        "client": [
+            "com.camelot.fabric.CamelotFabricClient"
         ]
     },
     "depends": {
