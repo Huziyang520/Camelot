@@ -49,6 +49,11 @@ final class ClothScreens {
                     Component.translatable("gui." + schema.namespace() + ".scope." + schema.scope().suffix()));
             Map<String, Object> edited = new LinkedHashMap<>();
             pending.put(config, edited);
+            if (pending.size() == 1) {
+                // 显眼位置说明本机与服端配置的区别，不另开界面
+                category.addEntry(entries.startTextDescription(
+                        Component.translatable("gui." + schema.namespace() + ".hint.local_only")).build());
+            }
             for (ConfigOption option : schema.guiOptions()) {
                 category.addEntry(build(entries, config, option, edited));
             }
@@ -85,11 +90,15 @@ final class ClothScreens {
                         .setSaveConsumer(value -> edited.put(option.key(), value ? 1 : 0))
                         .build();
             case SELECT:
-                return entries.startStringDropdownMenu(label, config.getString(option.key()),
-                                choice -> Component.translatable(config.schema().valueLabelKey(option, choice)))
-                        .setSelections(option.choices())
-                        .setDefaultValue((String) defaultValue)
-                        .setSaveConsumer(value -> edited.put(option.key(), value))
+                // 枚举选择器是"点一下换一个值"的按钮，字符串下拉在这种场景仍像输入框
+                Class<Enum> type = (Class<Enum>) option.enumType();
+                Enum<?> current = Enum.valueOf(type, config.getString(option.key()));
+                Enum<?> fallback = Enum.valueOf(type, (String) defaultValue);
+                return entries.startEnumSelector(label, type, (Enum) current)
+                        .setEnumNameProvider(value -> Component.translatable(
+                                config.schema().valueLabelKey(option, ((Enum<?>) value).name())))
+                        .setDefaultValue((Enum) fallback)
+                        .setSaveConsumer(value -> edited.put(option.key(), ((Enum<?>) value).name()))
                         .build();
             case STRING_LIST:
                 return entries.startStrList(label, new ArrayList<>(config.getList(option.key())))

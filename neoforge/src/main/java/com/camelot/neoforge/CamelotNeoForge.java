@@ -28,15 +28,15 @@ public final class CamelotNeoForge {
     }
 
     private static void registerPayloads(RegisterPayloadHandlersEvent event) {
+        // 同一 payload 两个方向只能注册一次：分开 playToClient/playToServer 会撞注册表
         PayloadRegistrar registrar = event.registrar("1");
-        registrar.playToClient(ConfigPayload.TYPE, ConfigPayload.CODEC,
-                (payload, context) -> context.enqueueWork(() -> CamelotNet.onClientPayload(payload)));
-        registrar.playToServer(ConfigPayload.TYPE, ConfigPayload.CODEC,
+        registrar.playBidirectional(ConfigPayload.TYPE, ConfigPayload.CODEC,
                 (payload, context) -> context.enqueueWork(() -> {
                     if (context.player() instanceof ServerPlayer player) {
                         CamelotNet.onServerPayload(payload, player);
                     }
-                }));
+                }),
+                (payload, context) -> context.enqueueWork(() -> CamelotNet.onClientPayload(payload)));
     }
 
     private static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {

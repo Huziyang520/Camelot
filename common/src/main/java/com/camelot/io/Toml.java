@@ -58,6 +58,17 @@ public final class Toml {
         return out;
     }
 
+    /** 旧版本把列表写成 {@code {blacklist = [...]}} 字符串，这里把内层数组取出来。 */
+    public static List<String> unnest(String text) {
+        int open = text.indexOf('[');
+        int close = text.lastIndexOf(']');
+        if (open < 0 || close <= open) {
+            return List.of();
+        }
+        Object parsed = parseValue(text.substring(open, close + 1));
+        return parsed instanceof List<?> list ? list.stream().map(String::valueOf).toList() : List.of();
+    }
+
     /** Renders {@code values} in schema order, with each option's comment above it. */
     public static String write(ConfigSchema schema, Map<String, Object> values) {
         StringBuilder out = new StringBuilder();

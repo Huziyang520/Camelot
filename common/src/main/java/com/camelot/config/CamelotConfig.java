@@ -1,6 +1,7 @@
 package com.camelot.config;
 
 import com.camelot.Camelot;
+import com.camelot.io.Toml;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -156,20 +157,26 @@ public final class CamelotConfig {
             case SELECT:
                 return raw instanceof String text && option.choices().contains(text) ? text : fallback;
             case STRING_LIST:
-                return raw instanceof List<?> list ? trimAll(list) : new ArrayList<String>();
+                return raw instanceof List<?> list ? repair(list) : new ArrayList<String>();
             default:
                 return fallback;
         }
     }
 
-    private static List<String> trimAll(List<?> list) {
+    private static List<String> repair(List<?> list) {
         List<String> out = new ArrayList<>();
         for (Object item : list) {
-            if (item != null) {
-                String text = item.toString().trim();
-                if (!text.isEmpty()) {
-                    out.add(text);
-                }
+            if (item == null) {
+                continue;
+            }
+            String text = item.toString().trim();
+            if (text.isEmpty()) {
+                continue;
+            }
+            if (text.startsWith("{") && text.contains("blacklist")) {
+                out.addAll(Toml.unnest(text));
+            } else {
+                out.add(text);
             }
         }
         return out;

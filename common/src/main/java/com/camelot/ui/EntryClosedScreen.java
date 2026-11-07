@@ -1,5 +1,7 @@
 package com.camelot.ui;
 
+import com.camelot.ui.Screens;
+
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -56,7 +58,7 @@ public final class EntryClosedScreen extends Screen {
     @Override
     public void onClose() {
         if (minecraft != null) {
-            minecraft.setScreenAndShow(parent);
+            Screens.open(parent);
         }
     }
 

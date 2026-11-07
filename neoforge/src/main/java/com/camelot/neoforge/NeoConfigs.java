@@ -51,6 +51,7 @@ public final class NeoConfigs {
             // 显式给文件名：FML 的默认名会随版本变化（common / local），两端统一用 <modid>-<scope>.toml
             String fileName = config.schema().fileName();
             importLegacy(config, fileName);
+            healLegacyValues(config);
             ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
             Map<String, ModConfigSpec.ConfigValue<?>> entries = new LinkedHashMap<>();
             defineAll(builder, config.schema(), entries);
@@ -97,6 +98,8 @@ public final class NeoConfigs {
 
     private static void defineAll(ModConfigSpec.Builder builder, ConfigSchema schema,
                                   Map<String, ModConfigSpec.ConfigValue<?>> entries) {
+        // 原生界面没有可插横幅的位置，提示放在第一个条目的说明里
+        builder.comment("Without permission to edit the server config, changes here only affect this game.");
         for (ConfigOption option : schema.options()) {
             if (option.comment() != null) {
                 builder.comment(option.comment());
@@ -117,8 +120,9 @@ public final class NeoConfigs {
                 return builder.defineEnum(option.key(),
                         Enum.valueOf(option.enumType(), (String) option.defaultValue()));
             case STRING_LIST:
-                return builder.defineListAllowEmpty(option.key(), (List<String>) option.defaultValue(),
-                        element -> element instanceof String);
+                // 四参重载才带"新增元素供给器"，界面里才会出现“+”
+                return builder.defineList(option.key(), (List<String>) option.defaultValue(),
+                        () -> "", element -> element instanceof String);
             default:
                 throw new IllegalArgumentException("Unsupported option type: " + option.type());
         }
@@ -150,6 +154,38 @@ public final class NeoConfigs {
             Camelot.LOG.error("Failed to import {}", legacy, e);
         }
     }
+
+    /** 旧版本把列表存成 {@code {blacklist = [...]}} 字符串，启动时修一次并回写文件。 */
+    private static void healLegacyValues(CamelotConfig config) {
+        Path file = FMLPaths.CONFIGDIR.get().resolve(config.schema().fileName());
+        if (!Files.exists(file)) {
+            return;
+        }
+        try {
+            Map<String, Object> parsed = Toml.parse(Files.readString(file));
+            boolean dirty = false;
+            for (ConfigOption option : config.schema().options()) {
+                Object raw = parsed.get(option.key());
+                if (raw == null) {
+                    continue;
+                }
+                config.set(option.key(), raw);
+                if (!String.valueOf(value(config, option)).equals(String.valueOf(raw))) {
+                    dirty = true;
+                }
+            }
+            if (dirty) {
+                Map<String, Object> clean = new LinkedHashMap<>();
+                for (ConfigOption option : config.schema().options()) {
+                    clean.put(option.key(), value(config, option));
+                }
+                Files.writeString(file, Toml.write(config.schema(), clean));
+            }
+        } catch (Exception e) {
+            Camelot.LOG.error("Failed to repair {}", file, e);
+        }
+    }
+
 
     private static void deleteLegacy(String namespace, List<String> written) {
         Path legacy = FMLPaths.CONFIGDIR.get().resolve(namespace + ".toml");

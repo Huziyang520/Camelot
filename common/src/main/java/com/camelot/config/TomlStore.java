@@ -65,7 +65,12 @@ public final class TomlStore implements ConfigStore {
             Map<String, Object> before = new LinkedHashMap<>(values);
             apply(Toml.parse(Files.readString(file)), values);
             lastModified = modified;
-            return !before.equals(values);
+            boolean changed = !before.equals(values);
+            if (changed) {
+                // 读到需要修正的旧值（如被写成 {blacklist = [...]} 的列表）就顺手回写规范化
+                write(values);
+            }
+            return changed;
         } catch (Exception e) {
             Camelot.LOG.error("Failed to read {}", file, e);
             return false;
