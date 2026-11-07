@@ -10,6 +10,13 @@ neoForge {
 dependencies {
     compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
     compileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
+    // Cloth Config API：可选界面依赖，仅编译期引用，运行期由玩家自行安装（软依赖）
+    compileOnly(group: 'me.shedaniel.cloth', name: 'cloth-config-neoforge', version: cloth_config_version) {
+        transitive = false
+    }
+    // nightconfig（TOML）：运行时由加载器提供（Fabric 端显式打包，见 fabric/build.gradle）
+    compileOnly group: 'com.electronwill.night-config', name: 'core', version: '3.6.4'
+    compileOnly group: 'com.electronwill.night-config', name: 'toml', version: '3.6.4'
 }
 
 configurations {

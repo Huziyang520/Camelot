@@ -17,11 +17,17 @@
     "entrypoints": {
         "main": [
             "com.camelot.fabric.CamelotFabric"
+        ],
+        "client": [
+            "com.camelot.fabric.CamelotFabricClient"
         ]
     },
     "depends": {
         "fabricloader": ">=0.14",
         "minecraft": "*",
         "java": ">=${java_version}"
+    },
+    "recommends": {
+        "cloth-config": "*"
     }
 }

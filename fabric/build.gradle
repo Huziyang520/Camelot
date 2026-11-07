@@ -7,6 +7,13 @@ dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
     implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+    // Cloth Config API：可选界面依赖，编译期引用，不打包
+    compileOnly("me.shedaniel.cloth:cloth-config-fabric:${cloth_config_version}") {
+        transitive = false
+    }
+    // nightconfig（TOML）：Fabric 不自带，随本库打包
+    include implementation("com.electronwill.night-config:core:3.6.4")
+    include implementation("com.electronwill.night-config:toml:3.6.4")
 }
 
 loom {
