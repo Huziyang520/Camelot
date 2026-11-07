@@ -10,10 +10,8 @@ import java.util.Map;
 
 /**
  * Reader and writer for the flat TOML subset used by generated config files.
- *
  * <p>Supported: {@code key = bool | integer | "string" | ["a", "b"]} and {@code #}
  * comments. Tables and dates are not part of the format, so a full parser would only
- * add weight.
  */
 public final class Toml {
 
@@ -28,9 +26,14 @@ public final class Toml {
     public static Map<String, Object> parse(String text) {
         Map<String, Object> out = new LinkedHashMap<>();
         String[] lines = text.split("\\R", -1);
+        String section = null;
         for (int i = 0; i < lines.length; i++) {
             String line = stripComment(lines[i]).trim();
-            if (line.isEmpty() || line.startsWith("[")) {
+            if (line.isEmpty()) {
+                continue;
+            }
+            if (line.startsWith("[") && line.endsWith("]")) {
+                section = unquote(line.substring(1, line.length() - 1));
                 continue;
             }
             int eq = line.indexOf('=');
@@ -49,7 +52,8 @@ public final class Toml {
                 }
                 value = joined.toString().trim();
             }
-            out.put(key, parseValue(value));
+            // 旧格式把列表写成 [键] 表 + blacklist 数组，读取时折回单键
+            out.put(section != null && "blacklist".equals(key) ? section : key, parseValue(value));
         }
         return out;
     }

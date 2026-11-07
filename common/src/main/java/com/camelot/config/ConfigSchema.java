@@ -7,7 +7,6 @@ import java.util.Set;
 
 /**
  * File identity, translation keys and the ordered option list of one config.
- *
  * <p>Order is significant: it is both the on-disk order and the screen order, so
  * functional options come first and presentation options come last.
  */

@@ -10,7 +10,6 @@ neoForge {
 dependencies {
     compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
     compileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
-    // Cloth Config API：可选界面依赖，仅编译期引用，运行期由玩家自行安装（软依赖）
     compileOnly(group: 'me.shedaniel.cloth', name: 'cloth-config-neoforge', version: cloth_config_version) {
         transitive = false
     }

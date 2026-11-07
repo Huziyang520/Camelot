@@ -8,16 +8,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Screen dispatch, one provider per mod namespace.
- *
  * <p>The platform decides what a mod's config screen is: NeoForge registers its own
  * {@code ConfigurationScreen}, Fabric a screen generated with Cloth Config API. A
- * missing provider, or a provider returning {@code null}, only means this mod has no
- * screen — it never falls back to another mod's UI.
  */
 public final class ConfigScreens {
 
-    /** Builds the config screen of one mod; may return {@code null}. */
     @FunctionalInterface
+    /** Builds the config screen of one mod; may return {@code null}. */
     public interface Factory {
         Screen create(Screen parent);
     }

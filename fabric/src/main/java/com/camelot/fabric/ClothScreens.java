@@ -21,10 +21,8 @@ import java.util.Map;
 
 /**
  * Builds the Fabric config screen from the schemas with Cloth Config API.
- *
  * <p>This is the only class of the library that references Cloth types; it is reached
  * through {@link FabricConfigs#register}, which checks the mod is present first.
- * Edited values are held locally until Save, so closing the screen changes nothing.
  */
 final class ClothScreens {
 
@@ -40,7 +38,6 @@ final class ClothScreens {
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
                 .setTitle(Component.translatable(configs.get(0).schema().titleKey()));
-        // 世界内非 OP 只能查看：服务端会拒绝其更新
         if (!canEdit()) {
             builder.setEditable(false);
         }

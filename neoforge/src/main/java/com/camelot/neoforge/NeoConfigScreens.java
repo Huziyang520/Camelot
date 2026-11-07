@@ -6,7 +6,6 @@ import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 
 /**
  * Installs NeoForge's own config screen for a mod.
- *
  * <p>Kept apart from {@link NeoConfigs} so a dedicated server never loads the client
  * classes; reached only from the client branch of the registration.
  */

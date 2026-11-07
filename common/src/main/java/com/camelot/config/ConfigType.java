@@ -2,7 +2,6 @@ package com.camelot.config;
 
 /**
  * Kind of value an option holds.
- *
  * <p>Values are stored in TOML and also travel over the network as text, so every
  * kind must be able to encode and restore itself without extra context.
  */

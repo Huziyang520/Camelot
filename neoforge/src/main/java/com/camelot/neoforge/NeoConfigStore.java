@@ -1,6 +1,9 @@
 package com.camelot.neoforge;
 
+import com.camelot.config.ConfigOption;
+import com.camelot.config.ConfigSchema;
 import com.camelot.config.ConfigStore;
+import com.camelot.config.ConfigType;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.ArrayList;
@@ -10,20 +13,19 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * {@link ConfigStore} backed by a NeoForge config spec.
- *
- * <p>The spec owns the file, so the file format, the generated screen and the runtime
- * values are one and the same object; this class is only the bridge to the library's
- * key/value view.
+ * {@link ConfigStore} 的 NeoForge 实现：值存在配置文件对应的 spec 里，
+ * 本类只负责"枚举 ↔ 字符串"和列表拷贝这类转换。
  */
 final class NeoConfigStore implements ConfigStore {
 
     private final ModConfigSpec spec;
     private final Map<String, ModConfigSpec.ConfigValue<?>> entries;
+    private final ConfigSchema schema;
 
-    NeoConfigStore(ModConfigSpec spec, Map<String, ModConfigSpec.ConfigValue<?>> entries) {
+    NeoConfigStore(ModConfigSpec spec, Map<String, ModConfigSpec.ConfigValue<?>> entries, ConfigSchema schema) {
         this.spec = spec;
         this.entries = new LinkedHashMap<>(entries);
+        this.schema = schema;
     }
 
     @Override
@@ -33,7 +35,7 @@ final class NeoConfigStore implements ConfigStore {
         }
         boolean changed = false;
         for (Map.Entry<String, ModConfigSpec.ConfigValue<?>> entry : entries.entrySet()) {
-            Object stored = copy(entry.getValue().get());
+            Object stored = stored(entry.getValue().get());
             if (!Objects.equals(values.get(entry.getKey()), stored)) {
                 values.put(entry.getKey(), stored);
                 changed = true;
@@ -49,11 +51,20 @@ final class NeoConfigStore implements ConfigStore {
             return;
         }
         for (Map.Entry<String, ModConfigSpec.ConfigValue<?>> entry : entries.entrySet()) {
+            ConfigOption option = schema.option(entry.getKey());
             Object value = values.get(entry.getKey());
-            if (value != null) {
-                ((ModConfigSpec.ConfigValue) entry.getValue()).set(copy(value));
+            if (option == null || value == null) {
+                continue;
             }
+            Object target = option.type() == ConfigType.SELECT && option.enumType() != null
+                    ? Enum.valueOf(option.enumType(), String.valueOf(value))
+                    : copy(value);
+            ((ModConfigSpec.ConfigValue) entry.getValue()).set(target);
         }
+    }
+
+    private Object stored(Object value) {
+        return value instanceof Enum<?> constant ? constant.name() : copy(value);
     }
 
     private static Object copy(Object value) {

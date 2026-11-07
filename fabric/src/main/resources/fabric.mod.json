@@ -29,5 +29,12 @@
     },
     "recommends": {
         "cloth-config": "*"
+    },
+    "custom": {
+        "modmenu": {
+            "badges": [
+                "library"
+            ]
+        }
     }
 }

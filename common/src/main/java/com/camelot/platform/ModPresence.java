@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Mod presence check usable from loader-agnostic code.
- *
  * <p>Resolved by reflection so it works no matter which mod initialises first: the caller
  * (a config screen entry point) may run before this library's own entry point.
  */

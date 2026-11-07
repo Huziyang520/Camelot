@@ -11,11 +11,8 @@ public final class JoinNotice {
     }
 
     /**
+     * /**
      * Shows {@code messageKey} to the player unless {@code toggleKey} is off.
-     *
-     * @param config   the local config (the toggle is client-only, so it is never synced)
-     * @param toggleKey config key acting as the switch
-     * @param messageKey translation key of the message
      */
     public static void show(Player player, CamelotConfig config, String toggleKey, String messageKey) {
         if (player == null || !config.getBool(toggleKey)) {

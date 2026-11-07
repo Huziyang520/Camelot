@@ -14,7 +14,6 @@ import java.util.List;
 
 /**
  * Binds configs to their TOML files and installs the Cloth screen for them.
- *
  * <p>The mod list calls the screen through {@link ConfigScreens}; when Cloth Config API
  * is missing nothing is installed and the button stays disabled.
  */
@@ -49,7 +48,6 @@ public final class FabricConfigs {
                 Files.delete(legacy);
             }
         } catch (Exception ignored) {
-            // 删不掉就留着，读取时已不再使用
         }
     }
 }

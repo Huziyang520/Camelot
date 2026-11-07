@@ -13,8 +13,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-/** NeoForge entry point: transport, join sync and the hot-reload tick. */
 @Mod(Camelot.MOD_ID)
+/** NeoForge entry point: transport, join sync and the hot-reload tick. */
 public final class CamelotNeoForge {
 
     public CamelotNeoForge(IEventBus modBus) {

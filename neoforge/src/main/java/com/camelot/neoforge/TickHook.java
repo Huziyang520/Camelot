@@ -6,7 +6,6 @@ import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * Client tick hook: keeps locally-edited configs fresh in a multiplayer world.
- *
  * <p>Only loaded from the client branch of the registration, so a dedicated server
  * never touches it.
  */

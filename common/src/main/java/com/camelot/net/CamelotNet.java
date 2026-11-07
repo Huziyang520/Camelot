@@ -14,10 +14,8 @@ import java.util.function.Consumer;
 
 /**
  * Config synchronisation shared by every mod that bundles this library.
- *
  * <p>Server → client: the whole set of syncable values, sent on join, after every
  * accepted update and after the file was re-read. Client → server: the same set,
- * accepted only from game-master permission holders, then persisted and echoed.
  */
 public final class CamelotNet {
 
@@ -30,11 +28,8 @@ public final class CamelotNet {
     }
 
     /**
+     * /**
      * Registers a config for synchronisation.
-     *
-     * @param config     the mod's config
-     * @param afterApply run on the server whenever the values changed, e.g. to refresh
-     *                   data derived from them (may be null)
      */
     public static void register(CamelotConfig config, Consumer<MinecraftServer> afterApply) {
         CamelotConfigs.register(config);

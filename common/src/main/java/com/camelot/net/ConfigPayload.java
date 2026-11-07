@@ -10,7 +10,6 @@ import java.util.Map;
 
 /**
  * Config values travelling in either direction.
- *
  * <p>One channel is shared by every mod that bundles this library; the namespace in the
  * body selects which config the values belong to, so a client only applies its own.
  */

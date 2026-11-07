@@ -10,10 +10,8 @@ import java.util.Map;
 
 /**
  * One schema-driven config of a mod.
- *
  * <p>The values live in memory; {@link #bind} hands the config to the platform store,
  * which is either a TOML file or the loader's own config spec, so the game screen and
- * the file always agree.
  */
 public final class CamelotConfig {
 

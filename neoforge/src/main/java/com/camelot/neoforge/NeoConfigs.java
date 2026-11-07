@@ -6,6 +6,7 @@ import com.camelot.config.CamelotConfigs;
 import com.camelot.config.ConfigOption;
 import com.camelot.config.ConfigScope;
 import com.camelot.config.ConfigSchema;
+import com.camelot.config.ConfigType;
 import com.camelot.io.Toml;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
@@ -21,15 +22,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Binds configs to the NeoForge config system.
- *
- * <p>Each schema becomes a {@link ModConfigSpec}, so the file, the values and the
- * generated {@code ConfigurationScreen} are NeoForge's own objects; the library only
- * keeps its key/value view on top.
+ * 把配置接到 NeoForge 配置系统：每个 schema 生成一份 {@link ModConfigSpec}，
+ * 文件、取值与自带配置界面都由 NeoForge 管理。
  */
 public final class NeoConfigs {
-
-    private static final String LEGACY_SUFFIX = ".toml";
 
     private NeoConfigs() {
     }
@@ -46,23 +42,47 @@ public final class NeoConfigs {
             return;
         }
         boolean client = isClient();
+        List<String> fileNames = new ArrayList<>();
         for (CamelotConfig config : configs) {
             if (config.scope() == ConfigScope.CLIENT && !client) {
                 continue;
             }
-            importLegacy(config);
+            ModConfig.Type type = type(config.scope());
+            // 显式给文件名：FML 的默认名会随版本变化（common / local），两端统一用 <modid>-<scope>.toml
+            String fileName = config.schema().fileName();
+            importLegacy(config, fileName);
             ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
             Map<String, ModConfigSpec.ConfigValue<?>> entries = new LinkedHashMap<>();
             defineAll(builder, config.schema(), entries);
             ModConfigSpec spec = builder.build();
-            config.bind(new NeoConfigStore(spec, entries));
+            config.bind(new NeoConfigStore(spec, entries, config.schema()));
             CamelotConfigs.register(config);
-            container.registerConfig(type(config.scope()), spec);
+            container.registerConfig(type, spec, fileName);
+            fileNames.add(fileName);
         }
-        deleteLegacy(namespace);
+        deleteLegacy(namespace, fileNames);
         if (client) {
             NeoConfigScreens.install(namespace, container);
         }
+    }
+
+    /**
+     * /**
+     * FML 在 26.3 内把 {@code COMMON}/{@code SERVER} 改名为 {@code LOCAL}/{@code SYNCED}，
+     */
+    private static ModConfig.Type type(ConfigScope scope) {
+        return scope == ConfigScope.CLIENT ? constant("CLIENT") : constant("LOCAL", "COMMON");
+    }
+
+    private static ModConfig.Type constant(String... names) {
+        for (String name : names) {
+            try {
+                return ModConfig.Type.valueOf(name);
+            } catch (IllegalArgumentException ignored) {
+                // 该版本没有这个常量，试下一个
+            }
+        }
+        throw new IllegalStateException("Unsupported ModConfig.Type: " + String.join("/", names));
     }
 
     /** 26.x 已移除 Dist，客户端专属用类是否存在来判断。 */
@@ -75,18 +95,13 @@ public final class NeoConfigs {
         }
     }
 
-    private static ModConfig.Type type(ConfigScope scope) {
-        return scope == ConfigScope.CLIENT ? ModConfig.Type.CLIENT : ModConfig.Type.COMMON;
-    }
-
     private static void defineAll(ModConfigSpec.Builder builder, ConfigSchema schema,
                                   Map<String, ModConfigSpec.ConfigValue<?>> entries) {
         for (ConfigOption option : schema.options()) {
-            String translation = schema.labelKey(option);
             if (option.comment() != null) {
                 builder.comment(option.comment());
             }
-            builder.translation(translation);
+            builder.translation(schema.labelKey(option));
             entries.put(option.key(), define(builder, option));
         }
     }
@@ -99,7 +114,8 @@ public final class NeoConfigs {
             case SWITCH:
                 return builder.define(option.key(), (Integer) option.defaultValue());
             case SELECT:
-                return builder.defineInList(option.key(), (String) option.defaultValue(), option.choices());
+                return builder.defineEnum(option.key(),
+                        Enum.valueOf(option.enumType(), (String) option.defaultValue()));
             case STRING_LIST:
                 return builder.defineListAllowEmpty(option.key(), (List<String>) option.defaultValue(),
                         element -> element instanceof String);
@@ -108,11 +124,10 @@ public final class NeoConfigs {
         }
     }
 
-    /** The old single-file layout is copied into the new per-scope file once. */
-    private static void importLegacy(CamelotConfig config) {
+    private static void importLegacy(CamelotConfig config, String fileName) {
         Path dir = FMLPaths.CONFIGDIR.get();
-        Path file = dir.resolve(config.schema().fileName());
-        Path legacy = dir.resolve(config.schema().namespace() + LEGACY_SUFFIX);
+        Path file = dir.resolve(fileName);
+        Path legacy = dir.resolve(config.schema().namespace() + ".toml");
         if (Files.exists(file) || !Files.exists(legacy)) {
             return;
         }
@@ -127,7 +142,7 @@ public final class NeoConfigs {
                 if (raw != null) {
                     config.set(option.key(), raw);
                 }
-                values.put(option.key(), snapshotOf(config, option));
+                values.put(option.key(), value(config, option));
             }
             Files.createDirectories(dir);
             Files.writeString(file, Toml.write(config.schema(), values));
@@ -136,16 +151,20 @@ public final class NeoConfigs {
         }
     }
 
-    /** 旧单文件在导入后删除，避免与新文件并存造成"改了不生效"的误判。 */
-    private static void deleteLegacy(String namespace) {
+    private static void deleteLegacy(String namespace, List<String> written) {
+        Path legacy = FMLPaths.CONFIGDIR.get().resolve(namespace + ".toml");
+        boolean imported = written.stream().anyMatch(name -> Files.exists(FMLPaths.CONFIGDIR.get().resolve(name)));
+        if (!imported) {
+            return;
+        }
         try {
-            Files.deleteIfExists(FMLPaths.CONFIGDIR.get().resolve(namespace + LEGACY_SUFFIX));
+            Files.deleteIfExists(legacy);
         } catch (Exception ignored) {
-            // 删除失败不影响新文件生效
+            // 删不掉不影响新文件生效
         }
     }
 
-    private static Object snapshotOf(CamelotConfig config, ConfigOption option) {
+    private static Object value(CamelotConfig config, ConfigOption option) {
         switch (option.type()) {
             case BOOLEAN:
                 return config.getBool(option.key());

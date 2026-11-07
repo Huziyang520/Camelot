@@ -14,7 +14,6 @@ import java.util.Set;
 
 /**
  * {@link ConfigStore} backed by a flat TOML file in the loader's config directory.
- *
  * <p>Reads are throttled and skip untouched files, so the per-tick reload pass costs
  * one stat call per config.
  */
