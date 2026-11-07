@@ -8,7 +8,7 @@ displayName = "${mod_name}"
 logoFile = "assets/camelot/textures/icon.png"
 authors = "${mod_author}"
 description = '''
-Shared library for Only TP and AuthCmd. Never published on its own; business mods bundle it.
+Shared library: configuration screens, join notices, networking and GUI helpers.
 '''
 [[dependencies.${mod_id}]]
 modId = "minecraft"
