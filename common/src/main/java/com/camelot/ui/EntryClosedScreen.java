@@ -10,7 +10,6 @@ import net.minecraft.util.FormattedCharSequence;
 
 import java.util.List;
 
-/** Small second-level screen used when the server closed the config entry. */
 public final class EntryClosedScreen extends Screen {
 
     private static final int TEXT_COLOR = 0xFFFFFFFF;

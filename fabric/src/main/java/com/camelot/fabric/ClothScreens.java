@@ -19,11 +19,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Builds the Fabric config screen from the schemas with Cloth Config API.
- * <p>This is the only class of the library that references Cloth types; it is reached
- * through {@link FabricConfigs#register}, which checks the mod is present first.
- */
 final class ClothScreens {
 
     private static final String CLOTH = "cloth-config";
@@ -85,7 +80,7 @@ final class ClothScreens {
                         .setSaveConsumer(value -> edited.put(option.key(), value ? 1 : 0))
                         .build();
             case SELECT:
-                // Enum selector cycles on click; a string dropdown still looks like a text box here
+
                 Class<Enum> type = (Class<Enum>) option.enumType();
                 Enum<?> current = Enum.valueOf(type, config.getString(option.key()));
                 Enum<?> fallback = Enum.valueOf(type, (String) defaultValue);

@@ -24,7 +24,7 @@ neoForge {
 }
 
 dependencies {
-    // Cloth Config API：可选界面依赖，仅编译期引用（NeoForge 端与 common 同坐标）
+
     compileOnly(group: 'me.shedaniel.cloth', name: 'cloth-config-neoforge', version: cloth_config_version) {
         transitive = false
     }

@@ -12,17 +12,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Binds configs to their TOML files and installs the Cloth screen for them.
- * <p>The mod list calls the screen through {@link ConfigScreens}; when Cloth Config API
- * is missing nothing is installed and the button stays disabled.
- */
 public final class FabricConfigs {
 
     private FabricConfigs() {
     }
 
-    /** Registers one mod's configs; call from the mod initializer. */
     public static void register(CamelotConfig... configs) {
         if (configs.length == 0) {
             return;
@@ -41,7 +35,6 @@ public final class FabricConfigs {
         ConfigScreens.register(namespace, parent -> ClothScreens.create(parent, bound));
     }
 
-    /** The old single-file layout is imported into the new per-scope files and dropped. */
     private static void deleteLegacy(Path legacy) {
         try {
             if (Files.exists(legacy)) {

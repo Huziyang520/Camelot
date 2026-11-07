@@ -3,10 +3,6 @@ package com.camelot.config;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * One schema entry: key, type, default value and how it is presented.
- * <p>Instances are immutable; the builder methods return a copy.
- */
 public final class ConfigOption {
 
     private final String key;
@@ -38,10 +34,6 @@ public final class ConfigOption {
         return new ConfigOption(key, ConfigType.SWITCH, defaultValue == 0 ? 0 : 1, List.of(), null, null, null, true);
     }
 
-    /**
-     * /**
-     * Bounded value. Uses an enum rather than a string: NeoForge renders enums as a cycle button,
-     */
     @SuppressWarnings("unchecked")
     public static ConfigOption select(String key, Enum<?> defaultValue) {
         Class<? extends Enum> type = defaultValue.getDeclaringClass();
@@ -53,17 +45,14 @@ public final class ConfigOption {
         return new ConfigOption(key, ConfigType.STRING_LIST, List.copyOf(defaultValue), List.of(), null, null, null, true);
     }
 
-    /** Tooltip shown by the screen, written above the key in the file. */
     public ConfigOption comment(String text) {
         return new ConfigOption(key, type, defaultValue, choices, enumType, text, legacyKey, inGui);
     }
 
-    /** Key used by an older file version; read once when the new key is absent. */
     public ConfigOption legacy(String oldKey) {
         return new ConfigOption(key, type, defaultValue, choices, enumType, comment, oldKey, inGui);
     }
 
-    /** Kept out of the generated screen, file-only. */
     public ConfigOption fileOnly() {
         return new ConfigOption(key, type, defaultValue, choices, enumType, comment, legacyKey, false);
     }

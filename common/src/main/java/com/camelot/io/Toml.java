@@ -8,11 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Reader and writer for the flat TOML subset used by generated config files.
- * <p>Supported: {@code key = bool | integer | "string" | ["a", "b"]} and {@code #}
- * comments. Tables and dates are not part of the format, so a full parser would only
- */
 public final class Toml {
 
     private static final char QUOTE = 34;
@@ -22,7 +17,6 @@ public final class Toml {
     private Toml() {
     }
 
-    /** Parses {@code text} into key/value pairs; unparsable lines are skipped. */
     public static Map<String, Object> parse(String text) {
         Map<String, Object> out = new LinkedHashMap<>();
         String[] lines = text.split("\\R", -1);
@@ -52,13 +46,12 @@ public final class Toml {
                 }
                 value = joined.toString().trim();
             }
-            // Legacy layout stored lists as a [key] table plus a blacklist array
+
             out.put(section != null && "blacklist".equals(key) ? section : key, parseValue(value));
         }
         return out;
     }
 
-    /** Extracts the inner array from a legacy {@code {blacklist = [...]}} string. */
     public static List<String> unnest(String text) {
         int open = text.indexOf('[');
         int close = text.lastIndexOf(']');
@@ -69,7 +62,6 @@ public final class Toml {
         return parsed instanceof List<?> list ? list.stream().map(String::valueOf).toList() : List.of();
     }
 
-    /** Renders {@code values} in schema order, with each option's comment above it. */
     public static String write(ConfigSchema schema, Map<String, Object> values) {
         StringBuilder out = new StringBuilder();
         for (ConfigOption option : schema.options()) {

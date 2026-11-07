@@ -12,13 +12,6 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 
-/**
- * Installs NeoForge's own config screen for a mod.
- * <p>NeoForge locks a section only for SERVER configs on a remote server, so a single-player
- * host without cheats could still change everything. The section screen below applies the
- * rule the Cloth screen uses: without gamemaster permission every entry stays visible but
- * cannot be changed.
- */
 final class NeoConfigScreens {
 
     private NeoConfigScreens() {

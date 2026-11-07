@@ -14,7 +14,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 @Mod(Camelot.MOD_ID)
-/** NeoForge entry point: transport, join sync and the hot-reload tick. */
+
 public final class CamelotNeoForge {
 
     public CamelotNeoForge(IEventBus modBus) {
@@ -28,7 +28,7 @@ public final class CamelotNeoForge {
     }
 
     private static void registerPayloads(RegisterPayloadHandlersEvent event) {
-        // One payload cannot be registered twice: separate playToClient/playToServer calls collide
+
         PayloadRegistrar registrar = event.registrar("1");
         registrar.playBidirectional(ConfigPayload.TYPE, ConfigPayload.CODEC,
                 (payload, context) -> context.enqueueWork(() -> {

@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 
-/** Client half of the Fabric transport; never loaded on a dedicated server. */
 public final class CamelotFabricClient implements ClientModInitializer {
 
     @Override
@@ -18,7 +17,6 @@ public final class CamelotFabricClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> CamelotConfigs.tickClient());
     }
 
-    /** Sends an update to the server; ignored outside a world or when the server has no such channel. */
     public static void send(ConfigPayload payload) {
         if (Minecraft.getInstance().getConnection() != null && ClientPlayNetworking.canSend(ConfigPayload.TYPE)) {
             ClientPlayNetworking.send(payload);

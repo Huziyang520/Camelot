@@ -12,11 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * {@link ConfigStore} backed by a flat TOML file in the loader's config directory.
- * <p>Reads are throttled and skip untouched files, so the per-tick reload pass costs
- * one stat call per config.
- */
 public final class TomlStore implements ConfigStore {
 
     private static final long CHECK_INTERVAL_MS = 1000L;
@@ -67,7 +62,7 @@ public final class TomlStore implements ConfigStore {
             lastModified = modified;
             boolean changed = !before.equals(values);
             if (changed) {
-                // Repairs values needing normalization, e.g. lists stored as {@code {blacklist = [...]}}
+
                 write(values);
             }
             return changed;
@@ -103,7 +98,7 @@ public final class TomlStore implements ConfigStore {
         if (carried.isEmpty()) {
             return;
         }
-        // Only a fully empty file counts as missing keys; partial files keep what was read
+
         for (ConfigOption option : schema.options()) {
             if (!carried.contains(option.key())) {
                 values.putIfAbsent(option.key(), defaultValue(option));

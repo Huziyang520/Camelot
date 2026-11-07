@@ -9,11 +9,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * One schema-driven config of a mod.
- * <p>The values live in memory; {@link #bind} hands the config to the platform store,
- * which is either a TOML file or the loader's own config spec, so the game screen and
- */
 public final class CamelotConfig {
 
     private final ConfigSchema schema;
@@ -25,7 +20,6 @@ public final class CamelotConfig {
         resetToDefaults();
     }
 
-    /** Called by the platform layer once the store backing this config exists. */
     public void bind(ConfigStore configStore) {
         this.store = configStore;
     }
@@ -42,12 +36,10 @@ public final class CamelotConfig {
         return schema.scope();
     }
 
-    /** Server-side values are pushed to clients; client-side ones stay local. */
     public boolean synced() {
         return schema.scope() == ConfigScope.COMMON;
     }
 
-    /** Reads the store; unreadable or missing values keep their defaults. */
     public void load() {
         if (store == null) {
             Camelot.LOG.warn("Config {} has no store bound", schema.fileName());
@@ -56,7 +48,6 @@ public final class CamelotConfig {
         store.read(values);
     }
 
-    /** Re-reads the store and reports whether anything changed. */
     public boolean reload() {
         if (store == null) {
             return false;
@@ -105,7 +96,6 @@ public final class CamelotConfig {
         values.put(key, coerce(raw, option));
     }
 
-    /** Values as text, ready to travel to the other side. */
     public Map<String, String> snapshot() {
         Map<String, String> out = new LinkedHashMap<>();
         for (ConfigOption option : schema.options()) {
@@ -114,7 +104,6 @@ public final class CamelotConfig {
         return out;
     }
 
-    /** Applies values received from the other side; unknown keys are skipped. */
     public void applyRemote(Map<String, String> remote) {
         for (Map.Entry<String, String> entry : remote.entrySet()) {
             ConfigOption option = schema.option(entry.getKey());

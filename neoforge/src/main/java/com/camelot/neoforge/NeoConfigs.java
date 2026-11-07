@@ -21,13 +21,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Binds configs to the NeoForge config system: file, values and screen all belong to NeoForge. */
 public final class NeoConfigs {
 
     private NeoConfigs() {
     }
 
-    /** Registers this mod's configs; call from the mod constructor. */
     public static void register(CamelotConfig... configs) {
         if (configs.length == 0) {
             return;
@@ -45,7 +43,7 @@ public final class NeoConfigs {
                 continue;
             }
             ModConfig.Type type = type(config.scope());
-            // Explicit file name: FML's default changed between versions (common/local); both loaders use <modid>-<scope>.toml
+
             String fileName = config.schema().fileName();
             importLegacy(config, fileName);
             healLegacyValues(config);
@@ -65,10 +63,8 @@ public final class NeoConfigs {
         }
     }
 
-    /** FML 26.3 renamed COMMON/SERVER to LOCAL/SYNCED; lookup by name covers both minor versions. */
     private static ModConfig.Type type(ConfigScope scope) {
-        // The common config belongs to the server: NeoForge greys out SERVER/SYNCED sections
-        // for players who may not change them, which is the requested operator-only rule.
+
         return scope == ConfigScope.CLIENT ? constant("CLIENT") : constant("SYNCED", "SERVER", "COMMON", "LOCAL");
     }
 
@@ -77,13 +73,12 @@ public final class NeoConfigs {
             try {
                 return ModConfig.Type.valueOf(name);
             } catch (IllegalArgumentException ignored) {
-                // Constant missing in this version, try the next name
+
             }
         }
         throw new IllegalStateException("Unsupported ModConfig.Type: " + String.join("/", names));
     }
 
-    /** 26.x dropped Dist; probe for a client-only class instead. */
     private static boolean isClient() {
         try {
             Class.forName("net.minecraft.client.Minecraft");
@@ -114,17 +109,16 @@ public final class NeoConfigs {
                                                        Class<? extends Enum> enumType) {
         switch (option.type()) {
             case BOOLEAN:
-                // Pass a primitive boolean: a boxed Boolean selects the generic define and yields a plain ConfigValue,
-                // which the screen reports as an unsupported element
+
                 return builder.define(option.key(), ((Boolean) option.defaultValue()).booleanValue());
             case SWITCH:
-                // Integers render as text boxes; booleans are checkboxes. Values stay 0/1 inside the library
+
                 return builder.define(option.key(), (Integer) option.defaultValue() != 0);
             case SELECT:
                 return builder.defineEnum(option.key(),
                         Enum.valueOf(enumType, (String) option.defaultValue()));
             case STRING_LIST:
-                // Only the four-argument overload carries an element supplier, which is what adds the + and remove buttons
+
                 return builder.defineList(option.key(), (List<String>) option.defaultValue(),
                         () -> "", element -> element instanceof String);
             default:
@@ -132,7 +126,6 @@ public final class NeoConfigs {
         }
     }
 
-    /** Copies values from the legacy single file; leaves an existing file untouched. */
     private static void importLegacy(CamelotConfig config, String fileName) {
         Path dir = FMLPaths.CONFIGDIR.get();
         Path file = dir.resolve(fileName);
@@ -160,7 +153,6 @@ public final class NeoConfigs {
         }
     }
 
-    /** Repairs legacy {@code {blacklist = [...]}} strings once at startup and writes the file back. */
     private static void healLegacyValues(CamelotConfig config) {
         Path file = FMLPaths.CONFIGDIR.get().resolve(config.schema().fileName());
         if (!Files.exists(file)) {
@@ -191,7 +183,6 @@ public final class NeoConfigs {
         }
     }
 
-    /** Removes the legacy file once the new one is written. */
     private static void deleteLegacy(String namespace, List<String> written) {
         Path dir = FMLPaths.CONFIGDIR.get();
         boolean imported = written.stream().anyMatch(name -> Files.exists(dir.resolve(name)));
@@ -201,7 +192,7 @@ public final class NeoConfigs {
         try {
             Files.deleteIfExists(dir.resolve(namespace + ".toml"));
         } catch (Exception ignored) {
-            // A failed delete does not affect the new file
+
         }
     }
 

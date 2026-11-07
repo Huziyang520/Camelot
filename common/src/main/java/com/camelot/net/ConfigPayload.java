@@ -8,14 +8,8 @@ import net.minecraft.resources.Identifier;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * Config values travelling in either direction.
- * <p>One channel is shared by every mod that bundles this library; the namespace in the
- * body selects which config the values belong to, so a client only applies its own.
- */
 public record ConfigPayload(String namespace, Map<String, String> values) implements CustomPacketPayload {
 
-    /** {@code createType(String)} treats its argument as a path, hence the explicit id. */
     public static final Type<ConfigPayload> TYPE =
             new Type<>(Identifier.fromNamespaceAndPath("camelot", "config"));
 

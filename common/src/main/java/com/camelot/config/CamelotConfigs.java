@@ -8,7 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Registry of every config owned by the mods that bundle this library. */
 public final class CamelotConfigs {
 
     private static final Map<String, List<CamelotConfig>> REGISTRY = new LinkedHashMap<>();
@@ -23,7 +22,6 @@ public final class CamelotConfigs {
         }
     }
 
-    /** The config of {@code namespace} that {@code scope} selects. */
     public static CamelotConfig get(String namespace, ConfigScope scope) {
         for (CamelotConfig config : REGISTRY.getOrDefault(namespace, List.of())) {
             if (config.scope() == scope) {
@@ -39,7 +37,6 @@ public final class CamelotConfigs {
         return flat;
     }
 
-    /** Client-side pass: only local configs, so server values are never overwritten. */
     public static void tickClient() {
         for (CamelotConfig config : all()) {
             if (config.scope() == ConfigScope.CLIENT) {
@@ -48,7 +45,6 @@ public final class CamelotConfigs {
         }
     }
 
-    /** Reload pass; changed server-side configs are re-broadcast. */
     public static void tick(MinecraftServer server) {
         boolean resend = false;
         for (CamelotConfig config : all()) {

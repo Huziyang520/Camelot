@@ -7,10 +7,8 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.level.ServerPlayer;
 
-/** Fabric transport for {@link ConfigPayload}. */
 public final class FabricNet implements NetSender {
 
-    /** Payload type and server receiver; safe on both sides. */
     public static void registerCommon() {
         PayloadTypeRegistry.serverboundPlay().register(ConfigPayload.TYPE, ConfigPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(ConfigPayload.TYPE, ConfigPayload.CODEC);
@@ -21,7 +19,7 @@ public final class FabricNet implements NetSender {
 
     @Override
     public void toServer(ConfigPayload payload) {
-        // Reached from the client only; the client class is resolved on first use.
+
         CamelotFabricClient.send(payload);
     }
 

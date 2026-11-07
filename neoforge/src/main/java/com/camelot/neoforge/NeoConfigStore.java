@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/** NeoForge {@link ConfigStore}: values live in the spec, this class only converts types and copies lists. */
 final class NeoConfigStore implements ConfigStore {
 
     private final ModConfigSpec spec;

@@ -7,7 +7,6 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 
-/** Fabric entry point: transport, join sync and the hot-reload tick. */
 public final class CamelotFabric implements ModInitializer {
 
     @Override

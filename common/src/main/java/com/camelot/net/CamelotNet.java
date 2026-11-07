@@ -12,11 +12,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
-/**
- * Config synchronisation shared by every mod that bundles this library.
- * <p>Server → client: the whole set of syncable values, sent on join, after every
- * accepted update and after the file was re-read. Client → server: the same set,
- */
 public final class CamelotNet {
 
     private static final Map<String, Consumer<MinecraftServer>> AFTER_APPLY = new ConcurrentHashMap<>();
@@ -27,10 +22,6 @@ public final class CamelotNet {
     private CamelotNet() {
     }
 
-    /**
-     * /**
-     * Registers a config for synchronisation.
-     */
     public static void register(CamelotConfig config, Consumer<MinecraftServer> afterApply) {
         CamelotConfigs.register(config);
         if (afterApply != null) {
@@ -42,7 +33,6 @@ public final class CamelotNet {
         sender = netSender;
     }
 
-    /** Sends every syncable config to one player. */
     public static void syncTo(ServerPlayer player) {
         NetSender net = sender;
         if (net == null || player == null || !net.canReceive(player)) {
@@ -55,7 +45,6 @@ public final class CamelotNet {
         }
     }
 
-    /** Re-sends every syncable config to all online players. */
     public static void syncToAll(MinecraftServer server) {
         NetSender net = sender;
         if (net == null || server == null) {
@@ -74,7 +63,6 @@ public final class CamelotNet {
         }
     }
 
-    /** Pushes local edits to the server (client side only); no-op when not in a world. */
     public static void sendUpdate(CamelotConfig config) {
         NetSender net = sender;
         if (net != null && config.synced()) {
@@ -82,7 +70,6 @@ public final class CamelotNet {
         }
     }
 
-    /** Values arrived from the server. */
     public static void onClientPayload(ConfigPayload payload) {
         CamelotConfig config = CamelotConfigs.get(payload.namespace(), ConfigScope.COMMON);
         if (config != null) {
@@ -91,12 +78,10 @@ public final class CamelotNet {
         }
     }
 
-    /** Whether the server already sent this config's values to this client. */
     public static boolean isSynced(String namespace) {
         return SYNCED.contains(namespace);
     }
 
-    /** Values arrived from a client: validate, persist and echo to everyone. */
     public static void onServerPayload(ConfigPayload payload, ServerPlayer player) {
         if (player == null || !player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
             return;
@@ -112,7 +97,6 @@ public final class CamelotNet {
         notifyApplied(config, server);
     }
 
-    /** The config file changed on disk: push the new values out and refresh derived data. */
     public static void onServerReload(MinecraftServer server) {
         syncToAll(server);
         for (CamelotConfig config : CamelotConfigs.all()) {
