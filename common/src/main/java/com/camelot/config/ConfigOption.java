@@ -40,7 +40,7 @@ public final class ConfigOption {
 
     /**
      * /**
-     * 有限取值。用枚举而不是字符串：NeoForge 的配置界面把枚举渲染成"点一下换一个值"的按钮，
+     * Bounded value. Uses an enum rather than a string: NeoForge renders enums as a cycle button,
      */
     @SuppressWarnings("unchecked")
     public static ConfigOption select(String key, Enum<?> defaultValue) {

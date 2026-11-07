@@ -28,7 +28,7 @@ public final class CamelotNeoForge {
     }
 
     private static void registerPayloads(RegisterPayloadHandlersEvent event) {
-        // 同一 payload 两个方向只能注册一次：分开 playToClient/playToServer 会撞注册表
+        // One payload cannot be registered twice: separate playToClient/playToServer calls collide
         PayloadRegistrar registrar = event.registrar("1");
         registrar.playBidirectional(ConfigPayload.TYPE, ConfigPayload.CODEC,
                 (payload, context) -> context.enqueueWork(() -> {

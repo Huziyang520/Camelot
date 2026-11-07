@@ -21,13 +21,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** 把配置接到 NeoForge 配置系统：文件、取值与自带配置界面都由 NeoForge 管理。 */
+/** Binds configs to the NeoForge config system: file, values and screen all belong to NeoForge. */
 public final class NeoConfigs {
 
     private NeoConfigs() {
     }
 
-    /** 在模组构造器里调用，登记该模组的全部配置。 */
+    /** Registers this mod's configs; call from the mod constructor. */
     public static void register(CamelotConfig... configs) {
         if (configs.length == 0) {
             return;
@@ -45,7 +45,7 @@ public final class NeoConfigs {
                 continue;
             }
             ModConfig.Type type = type(config.scope());
-            // 显式给文件名：FML 的默认名会随版本变化（common / local），两端统一 <modid>-<scope>.toml
+            // Explicit file name: FML's default changed between versions (common/local); both loaders use <modid>-<scope>.toml
             String fileName = config.schema().fileName();
             importLegacy(config, fileName);
             healLegacyValues(config);
@@ -65,7 +65,7 @@ public final class NeoConfigs {
         }
     }
 
-    /** FML 26.3 内把 COMMON/SERVER 改为 LOCAL/SYNCED，按名查找才能同时兼容两个小版本。 */
+    /** FML 26.3 renamed COMMON/SERVER to LOCAL/SYNCED; lookup by name covers both minor versions. */
     private static ModConfig.Type type(ConfigScope scope) {
         return scope == ConfigScope.CLIENT ? constant("CLIENT") : constant("LOCAL", "COMMON");
     }
@@ -75,13 +75,13 @@ public final class NeoConfigs {
             try {
                 return ModConfig.Type.valueOf(name);
             } catch (IllegalArgumentException ignored) {
-                // 该版本没有这个常量，试下一个
+                // Constant missing in this version, try the next name
             }
         }
         throw new IllegalStateException("Unsupported ModConfig.Type: " + String.join("/", names));
     }
 
-    /** 26.x 已移除 Dist，客户端专属用类是否存在来判断。 */
+    /** 26.x dropped Dist; probe for a client-only class instead. */
     private static boolean isClient() {
         try {
             Class.forName("net.minecraft.client.Minecraft");
@@ -112,15 +112,17 @@ public final class NeoConfigs {
                                                        Class<? extends Enum> enumType) {
         switch (option.type()) {
             case BOOLEAN:
-                return builder.define(option.key(), (Boolean) option.defaultValue());
+                // Pass a primitive boolean: a boxed Boolean selects the generic define and yields a plain ConfigValue,
+                // which the screen reports as an unsupported element
+                return builder.define(option.key(), ((Boolean) option.defaultValue()).booleanValue());
             case SWITCH:
-                // 整数只会渲染成输入框；布尔才是勾选框，库内仍按 0/1 处理
+                // Integers render as text boxes; booleans are checkboxes. Values stay 0/1 inside the library
                 return builder.define(option.key(), (Integer) option.defaultValue() != 0);
             case SELECT:
                 return builder.defineEnum(option.key(),
                         Enum.valueOf(enumType, (String) option.defaultValue()));
             case STRING_LIST:
-                // 四参重载才带元素供给器，界面里才会出现“+”与删除按钮
+                // Only the four-argument overload carries an element supplier, which is what adds the + and remove buttons
                 return builder.defineList(option.key(), (List<String>) option.defaultValue(),
                         () -> "", element -> element instanceof String);
             default:
@@ -128,7 +130,7 @@ public final class NeoConfigs {
         }
     }
 
-    /** 旧单文件里的值搬到新文件；新文件已存在则不动。 */
+    /** Copies values from the legacy single file; leaves an existing file untouched. */
     private static void importLegacy(CamelotConfig config, String fileName) {
         Path dir = FMLPaths.CONFIGDIR.get();
         Path file = dir.resolve(fileName);
@@ -156,7 +158,7 @@ public final class NeoConfigs {
         }
     }
 
-    /** 旧版本把列表存成 {@code {blacklist = [...]}} 字符串，启动时修一次并回写文件。 */
+    /** Repairs legacy {@code {blacklist = [...]}} strings once at startup and writes the file back. */
     private static void healLegacyValues(CamelotConfig config) {
         Path file = FMLPaths.CONFIGDIR.get().resolve(config.schema().fileName());
         if (!Files.exists(file)) {
@@ -187,7 +189,7 @@ public final class NeoConfigs {
         }
     }
 
-    /** 新文件写好后删除旧文件，避免"改了旧文件不生效"。 */
+    /** Removes the legacy file once the new one is written. */
     private static void deleteLegacy(String namespace, List<String> written) {
         Path dir = FMLPaths.CONFIGDIR.get();
         boolean imported = written.stream().anyMatch(name -> Files.exists(dir.resolve(name)));
@@ -197,7 +199,7 @@ public final class NeoConfigs {
         try {
             Files.deleteIfExists(dir.resolve(namespace + ".toml"));
         } catch (Exception ignored) {
-            // 删不掉不影响新文件生效
+            // A failed delete does not affect the new file
         }
     }
 

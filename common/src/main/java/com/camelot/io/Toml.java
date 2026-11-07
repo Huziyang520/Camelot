@@ -52,13 +52,13 @@ public final class Toml {
                 }
                 value = joined.toString().trim();
             }
-            // 旧格式把列表写成 [键] 表 + blacklist 数组，读取时折回单键
+            // Legacy layout stored lists as a [key] table plus a blacklist array
             out.put(section != null && "blacklist".equals(key) ? section : key, parseValue(value));
         }
         return out;
     }
 
-    /** 旧版本把列表写成 {@code {blacklist = [...]}} 字符串，这里把内层数组取出来。 */
+    /** Extracts the inner array from a legacy {@code {blacklist = [...]}} string. */
     public static List<String> unnest(String text) {
         int open = text.indexOf('[');
         int close = text.lastIndexOf(']');

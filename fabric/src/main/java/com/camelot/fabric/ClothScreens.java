@@ -85,7 +85,7 @@ final class ClothScreens {
                         .setSaveConsumer(value -> edited.put(option.key(), value ? 1 : 0))
                         .build();
             case SELECT:
-                // 枚举选择器是"点一下换一个值"的按钮，字符串下拉在这种场景仍像输入框
+                // Enum selector cycles on click; a string dropdown still looks like a text box here
                 Class<Enum> type = (Class<Enum>) option.enumType();
                 Enum<?> current = Enum.valueOf(type, config.getString(option.key()));
                 Enum<?> fallback = Enum.valueOf(type, (String) defaultValue);

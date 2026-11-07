@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/** {@link ConfigStore} 的 NeoForge 实现：值存在 spec 里，本类只做类型与列表拷贝的转换。 */
+/** NeoForge {@link ConfigStore}: values live in the spec, this class only converts types and copies lists. */
 final class NeoConfigStore implements ConfigStore {
 
     private final ModConfigSpec spec;

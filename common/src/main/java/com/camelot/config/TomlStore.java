@@ -67,7 +67,7 @@ public final class TomlStore implements ConfigStore {
             lastModified = modified;
             boolean changed = !before.equals(values);
             if (changed) {
-                // 读到需要修正的旧值（如被写成 {blacklist = [...]} 的列表）就顺手回写规范化
+                // Repairs values needing normalization, e.g. lists stored as {@code {blacklist = [...]}}
                 write(values);
             }
             return changed;
@@ -103,7 +103,7 @@ public final class TomlStore implements ConfigStore {
         if (carried.isEmpty()) {
             return;
         }
-        // 全部键缺失时才视为空文件；只有部分键缺失（如新版本新增项）保留读到的部分
+        // Only a fully empty file counts as missing keys; partial files keep what was read
         for (ConfigOption option : schema.options()) {
             if (!carried.contains(option.key())) {
                 values.putIfAbsent(option.key(), defaultValue(option));
