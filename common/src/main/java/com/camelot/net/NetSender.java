@@ -1,6 +1,5 @@
 package com.camelot.net;
 
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 /** Loader-specific transport, installed by each loader module at init. */
@@ -13,6 +12,4 @@ public interface NetSender {
     boolean canReceive(ServerPlayer player);
 
     void toPlayer(ServerPlayer player, ConfigPayload payload);
-
-    void toAll(MinecraftServer server, ConfigPayload payload);
 }

@@ -87,11 +87,6 @@ public final class ClothScreen {
                         .setDefaultValue((String) defaultValue)
                         .setSaveConsumer(value -> pending.put(option.key(), value))
                         .build();
-            case INT:
-                return entries.startIntSlider(label, config.getInt(option.key()), option.min(), option.max())
-                        .setDefaultValue((Integer) defaultValue)
-                        .setSaveConsumer(value -> pending.put(option.key(), value))
-                        .build();
             case STRING_LIST:
                 List<String> current = new ArrayList<>(config.getList(option.key()));
                 return entries.startStrList(label, current)

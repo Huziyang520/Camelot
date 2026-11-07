@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Schema-driven TOML config of one mod.
@@ -33,8 +32,6 @@ public final class CamelotConfig {
     private final ConfigSchema schema;
     private final Path path;
     private final Map<String, Object> values = new LinkedHashMap<>();
-    private final List<Runnable> listeners = new CopyOnWriteArrayList<>();
-
     private volatile long lastModified = -1L;
     private volatile long lastCheck;
 
@@ -116,19 +113,11 @@ public final class CamelotConfig {
                 return false;
             }
             load();
-            for (Runnable listener : listeners) {
-                listener.run();
-            }
             return true;
         } catch (Exception e) {
             Camelot.LOG.error("Failed to reload config {}", path, e);
             return false;
         }
-    }
-
-    /** Called after the file was re-read from disk, so callers can re-broadcast it. */
-    public void addReloadListener(Runnable listener) {
-        listeners.add(listener);
     }
 
     // ─── values ───
@@ -229,9 +218,6 @@ public final class CamelotConfig {
                 if (raw instanceof Boolean b) return b ? 1 : 0;
                 if (raw instanceof Number n) return n.intValue() == 0 ? 0 : 1;
                 return fallback;
-            case INT:
-                if (!(raw instanceof Number n)) return fallback;
-                return Math.max(option.min(), Math.min(option.max(), n.intValue()));
             case SELECT:
                 if (!(raw instanceof String s)) return fallback;
                 return option.choices().contains(s) ? s : fallback;
@@ -280,12 +266,6 @@ public final class CamelotConfig {
                 return Boolean.parseBoolean(text);
             case SWITCH:
                 return "1".equals(text) || "true".equalsIgnoreCase(text) ? 1 : 0;
-            case INT:
-                try {
-                    return Integer.parseInt(text.trim());
-                } catch (NumberFormatException e) {
-                    return 0;
-                }
             case STRING_LIST:
                 return text.isEmpty() ? new ArrayList<String>() : new ArrayList<>(List.of(text.split("\n")));
             default:

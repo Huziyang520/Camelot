@@ -17,9 +17,6 @@ public enum ConfigType {
     /** TOML string limited to a fixed set of choices. */
     SELECT,
 
-    /** TOML integer with an inclusive range. */
-    INT,
-
     /** TOML list stored as {@code [option] blacklist = [...]}. */
     STRING_LIST
 }

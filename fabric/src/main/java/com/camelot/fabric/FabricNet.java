@@ -5,7 +5,6 @@ import com.camelot.net.ConfigPayload;
 import com.camelot.net.NetSender;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 /** Fabric transport for {@link ConfigPayload}. */
@@ -34,14 +33,5 @@ public final class FabricNet implements NetSender {
     @Override
     public void toPlayer(ServerPlayer player, ConfigPayload payload) {
         ServerPlayNetworking.send(player, payload);
-    }
-
-    @Override
-    public void toAll(MinecraftServer server, ConfigPayload payload) {
-        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            if (canReceive(player)) {
-                ServerPlayNetworking.send(player, payload);
-            }
-        }
     }
 }
