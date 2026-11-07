@@ -67,7 +67,9 @@ public final class NeoConfigs {
 
     /** FML 26.3 renamed COMMON/SERVER to LOCAL/SYNCED; lookup by name covers both minor versions. */
     private static ModConfig.Type type(ConfigScope scope) {
-        return scope == ConfigScope.CLIENT ? constant("CLIENT") : constant("LOCAL", "COMMON");
+        // The common config belongs to the server: NeoForge greys out SERVER/SYNCED sections
+        // for players who may not change them, which is the requested operator-only rule.
+        return scope == ConfigScope.CLIENT ? constant("CLIENT") : constant("SYNCED", "SERVER");
     }
 
     private static ModConfig.Type constant(String... names) {
