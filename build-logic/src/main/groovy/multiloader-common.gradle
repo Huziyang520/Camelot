@@ -3,7 +3,6 @@ plugins {
     id 'maven-publish'
 }
 
-// 每个 target 有独立输出目录：模块源码共享，产物不能互相覆盖（targets/<t>/build/<module>/libs）。
 layout.buildDirectory = rootProject.layout.buildDirectory.dir(project.name)
 
 base {
@@ -11,9 +10,16 @@ base {
 }
 
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+    toolchain.languageVersion = JavaLanguageVersion.of((findProperty('compile_java_version') ?: java_version) as int)
     withSourcesJar()
     withJavadocJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    if (findProperty('java_target_version') != null) {
+        options.release = java_target_version as int
+    }
 }
 
 tasks.withType(Javadoc).configureEach {
@@ -21,7 +27,6 @@ tasks.withType(Javadoc).configureEach {
     options.addStringOption('Xdoclint:none', '-quiet')
 }
 
-// 仓库根的 LICENSE：target 是构建根，需回退一层
 def licenseFile = new File(rootProject.projectDir.parentFile, 'LICENSE')
 
 repositories {
@@ -49,6 +54,7 @@ repositories {
     maven { name = 'BlameJared'; url = 'https://maven.blamejared.com' }
     maven { name = 'MinecraftForge'; url = 'https://maven.minecraftforge.net/' }
     maven { name = 'FabricMC'; url = 'https://maven.fabricmc.net/' }
+    maven { name = 'Shedaniel'; url = 'https://maven.shedaniel.me/' }
     maven { name = 'TerraformersMC'; url = 'https://maven.terraformersmc.com/releases/' }
 }
 
@@ -58,8 +64,6 @@ repositories {
     }
 }
 
-// target 专属源码 / 资源覆盖：targets/<t>/overlay/<module>/{java,resources}。
-// 合并进生成目录后覆盖共享实现；各加载器模块通过 commonJava/commonResources 消费合并结果。
 def targetOverlayProperty = findProperty('target_overlay')
 if (targetOverlayProperty) {
     def overlayRoot = rootProject.file(targetOverlayProperty)
@@ -133,6 +137,7 @@ processResources {
             'license'                      : license,
             'description'                  : project.description,
             'neoforge_version'             : project.hasProperty('neoforge_version') ? neoforge_version : '',
+            'neoforge_version_range'       : project.hasProperty('neoforge_version_range') ? neoforge_version_range : '',
             'credits'                      : credits,
             'java_version'                 : java_version
     ]
