@@ -3,7 +3,6 @@ package com.camelot.neoforge;
 import com.camelot.Camelot;
 import com.camelot.config.CamelotConfigs;
 import com.camelot.net.CamelotNet;
-import com.camelot.net.ConfigPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
@@ -29,15 +28,7 @@ public final class CamelotNeoForge {
 
     private static void registerPayloads(RegisterPayloadHandlersEvent event) {
 
-        PayloadRegistrar registrar = event.registrar("1");
-        registrar.playBidirectional(ConfigPayload.TYPE, ConfigPayload.CODEC,
-                (payload, context) -> context.enqueueWork(() -> {
-                    if (context.player() instanceof ServerPlayer player) {
-                        CamelotNet.onServerPayload(payload, player);
-                    } else {
-                        CamelotNet.onClientPayload(payload);
-                    }
-                }));
+        PayloadRegistration.register(event.registrar("1"));
     }
 
     private static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {

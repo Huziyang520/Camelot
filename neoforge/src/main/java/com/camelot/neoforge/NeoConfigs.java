@@ -65,7 +65,7 @@ public final class NeoConfigs {
 
     private static ModConfig.Type type(ConfigScope scope) {
 
-        return scope == ConfigScope.CLIENT ? constant("CLIENT") : constant("SYNCED", "SERVER", "COMMON", "LOCAL");
+        return scope == ConfigScope.CLIENT ? constant("CLIENT") : constant("SYNCED", "COMMON", "SERVER", "LOCAL");
     }
 
     private static ModConfig.Type constant(String... names) {
