@@ -32,14 +32,14 @@ public final class NeoForgeNet implements NetSender {
 
     public static void registerPayloads(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar("1");
-        registrar.playToServer(TYPE, ConfigPacket.CODEC, (packet, context) ->
+        registrar.playBidirectional(TYPE, ConfigPacket.CODEC, (packet, context) ->
                 context.enqueueWork(() -> {
                     if (context.player() instanceof ServerPlayer player) {
                         CamelotNet.onServerPayload(packet.payload(), player);
+                    } else {
+                        CamelotNet.onClientPayload(packet.payload());
                     }
                 }));
-        registrar.playToClient(TYPE, ConfigPacket.CODEC, (packet, context) ->
-                context.enqueueWork(() -> CamelotNet.onClientPayload(packet.payload())));
     }
 
     @Override
