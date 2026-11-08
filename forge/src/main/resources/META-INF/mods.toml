@@ -12,7 +12,7 @@ Shared library: configuration screens, join notices, networking and GUI helpers.
 '''
 [[dependencies.${mod_id}]]
 modId = "minecraft"
-type = "required"
+mandatory = true
 versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "BOTH"
