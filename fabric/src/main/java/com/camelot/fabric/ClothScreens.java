@@ -21,12 +21,13 @@ import java.util.Map;
 final class ClothScreens {
 
     private static final String CLOTH = "cloth-config";
+    private static final String CLOTH_LEGACY = "cloth_config";
 
     private ClothScreens() {
     }
 
     static Screen create(Screen parent, List<CamelotConfig> configs) {
-        if (!ModPresence.isLoaded(CLOTH)) {
+        if (!ModPresence.isLoaded(CLOTH) && !ModPresence.isLoaded(CLOTH_LEGACY)) {
             return null;
         }
         ConfigBuilder builder = ConfigBuilder.create()
