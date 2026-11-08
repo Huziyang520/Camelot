@@ -30,14 +30,14 @@ public final class CamelotNeoForge {
     private static void registerPayloads(RegisterPayloadHandlersEvent event) {
 
         PayloadRegistrar registrar = event.registrar("1");
-        registrar.playToServer(ConfigPayload.TYPE, ConfigPayload.CODEC,
+        registrar.playBidirectional(ConfigPayload.TYPE, ConfigPayload.CODEC,
                 (payload, context) -> context.enqueueWork(() -> {
                     if (context.player() instanceof ServerPlayer player) {
                         CamelotNet.onServerPayload(payload, player);
+                    } else {
+                        CamelotNet.onClientPayload(payload);
                     }
                 }));
-        registrar.playToClient(ConfigPayload.TYPE, ConfigPayload.CODEC,
-                (payload, context) -> context.enqueueWork(() -> CamelotNet.onClientPayload(payload)));
     }
 
     private static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
