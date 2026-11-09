@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
 final class NeoConfigScreens {
 
@@ -20,6 +21,8 @@ final class NeoConfigScreens {
     static void install(String namespace, ModContainer container) {
         ConfigScreens.register(namespace,
                 parent -> new ConfigurationScreen(container, parent, NeoConfigScreens::section));
+        container.registerExtensionPoint(IConfigScreenFactory.class,
+                (modContainer, parent) -> new ConfigurationScreen(container, parent, NeoConfigScreens::section));
         TickHook.register();
     }
 
