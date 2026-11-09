@@ -15,14 +15,14 @@ public final class CamelotConfigs {
     private CamelotConfigs() {
     }
 
-    public static void register(CamelotConfig config) {
+    public static synchronized void register(CamelotConfig config) {
         List<CamelotConfig> configs = REGISTRY.computeIfAbsent(config.namespace(), key -> new ArrayList<>());
         if (!configs.contains(config)) {
             configs.add(config);
         }
     }
 
-    public static CamelotConfig get(String namespace, ConfigScope scope) {
+    public static synchronized CamelotConfig get(String namespace, ConfigScope scope) {
         for (CamelotConfig config : REGISTRY.getOrDefault(namespace, List.of())) {
             if (config.scope() == scope) {
                 return config;
@@ -31,7 +31,7 @@ public final class CamelotConfigs {
         return null;
     }
 
-    public static Iterable<CamelotConfig> all() {
+    public static synchronized Iterable<CamelotConfig> all() {
         List<CamelotConfig> flat = new ArrayList<>();
         REGISTRY.values().forEach(flat::addAll);
         return flat;
