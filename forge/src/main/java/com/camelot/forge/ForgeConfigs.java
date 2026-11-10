@@ -4,6 +4,7 @@ import com.camelot.config.CamelotConfig;
 import com.camelot.config.CamelotConfigs;
 import com.camelot.config.ConfigScope;
 import com.camelot.config.TomlStore;
+import com.camelot.ui.ConfigScreens;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -40,9 +41,10 @@ public final class ForgeConfigs {
         }
         deleteLegacy(legacy);
         if (client) {
+            ConfigScreens.register(namespace, parent -> ClothScreens.create(parent, bound));
             ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
                     () -> new ConfigScreenHandler.ConfigScreenFactory(
-                            (minecraft, parent) -> ClothScreens.create(parent, bound)));
+                            (minecraft, parent) -> ConfigScreens.create(namespace, parent)));
         }
     }
 

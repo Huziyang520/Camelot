@@ -4,6 +4,7 @@ import com.camelot.config.CamelotConfig;
 import com.camelot.config.CamelotConfigs;
 import com.camelot.config.ConfigScope;
 import com.camelot.config.TomlStore;
+import com.camelot.ui.ConfigScreens;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLPaths;
@@ -41,8 +42,9 @@ public final class NeoConfigs {
         if (client) {
             ModContainer container = ModList.get().getModContainerById(namespace).orElse(null);
             if (container != null) {
+                ConfigScreens.register(namespace, parent -> ClothScreens.create(parent, bound));
                 container.registerExtensionPoint(IConfigScreenFactory.class,
-                        (minecraft, parent) -> ClothScreens.create(parent, bound));
+                        (minecraft, parent) -> ConfigScreens.create(namespace, parent));
             }
         }
     }
