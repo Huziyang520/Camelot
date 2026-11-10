@@ -22,7 +22,7 @@ final class NeoConfigScreens {
         ConfigScreens.register(namespace,
                 parent -> new ConfigurationScreen(container, parent, NeoConfigScreens::section));
         container.registerExtensionPoint(IConfigScreenFactory.class,
-                (modContainer, parent) -> new ConfigurationScreen(container, parent, NeoConfigScreens::section));
+                (modContainer, parent) -> ConfigScreens.create(namespace, parent));
         TickHook.register();
     }
 
